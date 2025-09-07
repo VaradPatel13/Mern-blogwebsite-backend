@@ -1,4 +1,4 @@
-// src/app.js (UPDATED)
+// src/app.js 
 
 import express from "express";
 import cors from "cors";
@@ -11,20 +11,33 @@ import morgan from "morgan";
 const app = express();
 
 // --- Middleware Configuration ---
-app.use(morgan('dev')); // 2. Use morgan for logging
-app.use(cors({
-    origin:"http://localhost:5173",
-    credentials: true
-}));
+app.use(morgan('dev')); 
+
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+    ],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
 app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(express.static("public"));
 app.use(cookieParser());
+
 // --- Routes ---
 app.use("/api/v1", routerV1);
 
+// Health Check Endpoint
+app.use("/", (req, res) => {
+    res.send("Welcome to Bolify Backend!");
+});
+
 // --- Global Error Handler ---
-// This must be the last middleware
 app.use(errorHandler);
 
 export { app };
