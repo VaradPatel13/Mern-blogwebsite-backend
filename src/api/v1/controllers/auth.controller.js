@@ -6,10 +6,11 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-import { sendEmail } from '../../../services/mail.service.js'
+import { sendEmail } from '../../../services/mail.service.js';
 import { OAuth2Client } from 'google-auth-library';
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
 /**
  * @description Generates a new pair of access and refresh tokens for a user.
  * @param {string} userId - The ID of the user.
@@ -31,6 +32,13 @@ const generateAccessAndRefreshTokens = async (userId) => {
     } catch (error) {
         throw new ApiError(500, "Something went wrong while generating tokens");
     }
+};
+
+// --- Common cookie options ---
+const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production", // true only in production
+    sameSite: "None", // required for cross-site cookies
 };
 
 /**
@@ -93,15 +101,10 @@ const loginUser = asyncHandler(async (req, res) => {
 
     const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
 
-    const options = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-    };
-
     return res
         .status(200)
-        .cookie("accessToken", accessToken, options)
-        .cookie("refreshToken", refreshToken, options)
+        .cookie("accessToken", accessToken, cookieOptions)
+        .cookie("refreshToken", refreshToken, cookieOptions)
         .json(
             new ApiResponse(
                 200,
@@ -122,15 +125,10 @@ const logoutUser = asyncHandler(async (req, res) => {
         { new: true }
     );
 
-    const options = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-    };
-
     return res
         .status(200)
-        .clearCookie("accessToken", options)
-        .clearCookie("refreshToken", options)
+        .clearCookie("accessToken", cookieOptions)
+        .clearCookie("refreshToken", cookieOptions)
         .json(new ApiResponse(200, {}, "User logged out successfully"));
 });
 
@@ -161,21 +159,16 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
             throw new ApiError(401, "Refresh token is expired or used");
         }
 
-        const { accessToken, newRefreshToken } = await generateAccessAndRefreshTokens(user._id);
-
-        const options = {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-        };
+        const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
 
         return res
             .status(200)
-            .cookie("accessToken", accessToken, options)
-            .cookie("refreshToken", newRefreshToken, options)
+            .cookie("accessToken", accessToken, cookieOptions)
+            .cookie("refreshToken", refreshToken, cookieOptions)
             .json(
                 new ApiResponse(
                     200,
-                    { accessToken, refreshToken: newRefreshToken },
+                    { accessToken, refreshToken },
                     "Access token refreshed successfully"
                 )
             );
@@ -183,6 +176,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
         throw new ApiError(401, error?.message || "Invalid refresh token");
     }
 });
+
 /**
  * @description Handles the "forgot password" request.
  * @route POST /api/v1/auth/forgot-password
@@ -195,19 +189,14 @@ const forgotPassword = asyncHandler(async (req, res) => {
 
     const user = await User.findOne({ email });
     if (!user) {
-        // To prevent user enumeration, we don't reveal that the user doesn't exist.
-        // We still send a success response.
+        // To prevent user enumeration
         return res.status(200).json(new ApiResponse(200, {}, "If a user with that email exists, a password reset link has been sent."));
     }
 
-    // Generate the reset token
     const resetToken = user.createPasswordResetToken();
     await user.save({ validateBeforeSave: false });
 
-    // Create reset URL
-    // In a real frontend app, this URL would point to your password reset page
     const resetURL = `${req.protocol}://${req.get('host')}/api/v1/auth/reset-password/${resetToken}`;
-
     const message = `Forgot your password? Submit a PATCH request with your new password to: \n${resetURL}\n\nIf you didn't forget your password, please ignore this email.`;
 
     try {
@@ -240,13 +229,8 @@ const resetPassword = asyncHandler(async (req, res) => {
         throw new ApiError(400, "New password is required.");
     }
 
-    // Hash the incoming token to match the one stored in the DB
-    const hashedToken = crypto
-        .createHash("sha256")
-        .update(token)
-        .digest("hex");
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
 
-    // Find user by the hashed token and check if it hasn't expired
     const user = await User.findOne({
         passwordResetToken: hashedToken,
         passwordResetExpires: { $gt: Date.now() },
@@ -256,30 +240,26 @@ const resetPassword = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Token is invalid or has expired.");
     }
 
-    // Set the new password
     user.password = password;
-    // Clear the reset token fields
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
     await user.save();
 
-    // Log the user in by generating new tokens
     const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
-
-    const options = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-    };
 
     return res
         .status(200)
-        .cookie("accessToken", accessToken, options)
-        .cookie("refreshToken", refreshToken, options)
+        .cookie("accessToken", accessToken, cookieOptions)
+        .cookie("refreshToken", refreshToken, cookieOptions)
         .json(new ApiResponse(200, { user }, "Password reset successfully. You are now logged in."));
 });
 
+/**
+ * @description Google OAuth login.
+ * @route POST /api/v1/auth/google-login
+ */
 const googleLogin = asyncHandler(async (req, res) => {
-    const { credential } = req.body; // This is the token from Google
+    const { credential } = req.body;
 
     const ticket = await client.verifyIdToken({
         idToken: credential,
@@ -289,13 +269,10 @@ const googleLogin = asyncHandler(async (req, res) => {
 
     const { name, email, picture } = payload;
 
-    // Check if user already exists
     let user = await User.findOne({ email });
 
     if (!user) {
-        // If user doesn't exist, create a new one
         const username = email.split('@')[0] + Math.floor(Math.random() * 1000);
-        // A random password is required by our schema but won't be used for login
         const randomPassword = Math.random().toString(36).slice(-8);
 
         user = await User.create({
@@ -307,16 +284,13 @@ const googleLogin = asyncHandler(async (req, res) => {
         });
     }
 
-    // Generate our own tokens and log the user in
     const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
     const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
 
-    const options = { httpOnly: true, secure: true };
-
     return res
         .status(200)
-        .cookie("accessToken", accessToken, options)
-        .cookie("refreshToken", refreshToken, options)
+        .cookie("accessToken", accessToken, cookieOptions)
+        .cookie("refreshToken", refreshToken, cookieOptions)
         .json(
             new ApiResponse(
                 200,
@@ -326,5 +300,12 @@ const googleLogin = asyncHandler(async (req, res) => {
         );
 });
 
-// Add the new functions to the export list
-export { registerUser, loginUser, logoutUser, refreshAccessToken, forgotPassword, resetPassword , googleLogin};
+export {
+    registerUser,
+    loginUser,
+    logoutUser,
+    refreshAccessToken,
+    forgotPassword,
+    resetPassword,
+    googleLogin
+};

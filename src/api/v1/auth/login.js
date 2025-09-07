@@ -1,3 +1,5 @@
+import { User } from "../models/user.model";
+
 /**
  * @description Handles user login.
  * @route POST /api/v1/auth/login
