@@ -17,7 +17,8 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://mern-blogwebsite-frontend.vercel.app"
+      "https://mern-blogwebsite-frontend.vercel.app",
+      "https://mindloomsblog.vercel.app"
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
