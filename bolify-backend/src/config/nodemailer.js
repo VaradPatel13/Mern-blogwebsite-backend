@@ -17,7 +17,7 @@ const transporter = nodemailer.createTransport({
 const sendEmail = async ({ email, subject, message, html }) => {
   try {
     const mailOptions = {
-      from: `"Bolify" <${process.env.EMAIL_USER}>`,
+      from: `"MindLoom" <${process.env.EMAIL_USER}>`,
       to: email,
       subject,
       text: message || "", // fallback plain text
@@ -26,14 +26,14 @@ const sendEmail = async ({ email, subject, message, html }) => {
         `
         <div style="max-width:600px;margin:0 auto;font-family:'Segoe UI',Arial,sans-serif;color:#374151;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
           <div style="background:#f59e0b;color:#fff;padding:18px 24px;text-align:center;font-size:20px;font-weight:600;">
-            Bolify
+            MindLoom
           </div>
           <div style="padding:24px;">
             <h2 style="color:#111827;font-size:22px;margin-bottom:12px;">${subject}</h2>
             <p style="color:#374151;font-size:15px;line-height:1.6;">${message}</p>
           </div>
           <div style="background:#f3f4f6;padding:14px;text-align:center;font-size:12px;color:#6b7280;">
-            © ${new Date().getFullYear()} Bolify. All rights reserved.
+            © ${new Date().getFullYear()} MindLoom. All rights reserved.
           </div>
         </div>
       `,
@@ -55,7 +55,7 @@ const sendOtpEmail = async (to, otp) => {
   const html = `
     <div style="max-width:600px;margin:0 auto;font-family:'Segoe UI',Arial,sans-serif;color:#374151;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
       <div style="background:#f59e0b;color:#fff;padding:18px 24px;text-align:center;font-size:20px;font-weight:600;">
-        Bolify Verification
+        MindLoom Verification
       </div>
       <div style="padding:24px;">
         <h2 style="color:#111827;margin-bottom:10px;">Your Verification Code</h2>
@@ -65,14 +65,14 @@ const sendOtpEmail = async (to, otp) => {
         <p>If you didn’t request this, you can safely ignore this email.</p>
       </div>
       <div style="background:#f3f4f6;padding:14px;text-align:center;font-size:12px;color:#6b7280;">
-        © ${new Date().getFullYear()} Bolify. All rights reserved.
+        © ${new Date().getFullYear()} MindLoom. All rights reserved.
       </div>
     </div>
   `;
 
   return sendEmail({
     email: to,
-    subject: "Your Bolify Verification Code",
+    subject: "Your MindLoom Verification Code",
     message: `Your verification code is ${otp}`,
     html,
   });
@@ -83,40 +83,40 @@ const sendOtpEmail = async (to, otp) => {
  */
 const mailTemplates = {
   welcome: (user) => ({
-    subject: "🎉 Welcome to Bolify!",
-    message: `Hi ${user.fullName}, welcome to Bolify!`,
+    subject: "🎉 Welcome to MindLoom!",
+    message: `Hi ${user.fullName}, welcome to MindLoom!`,
     html: `
       <div style="max-width:600px;margin:0 auto;font-family:'Segoe UI',Arial,sans-serif;color:#374151;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
         <div style="background:#f59e0b;color:#fff;padding:18px 24px;text-align:center;font-size:20px;font-weight:600;">
-          Bolify
+          MindLoom
         </div>
         <div style="padding:24px;">
           <h2 style="color:#111827;margin-bottom:10px;">Welcome, ${user.fullName}!</h2>
-          <p>We’re excited to have you on board. Start exploring Bolify today 🚀</p>
-          <p style="margin-top:18px;">— The Bolify Team</p>
+          <p>We’re excited to have you on board. Start exploring MindLoom today 🚀</p>
+          <p style="margin-top:18px;">— The MindLoom Team</p>
         </div>
         <div style="background:#f3f4f6;padding:14px;text-align:center;font-size:12px;color:#6b7280;">
-          © ${new Date().getFullYear()} Bolify. All rights reserved.
+          © ${new Date().getFullYear()} MindLoom. All rights reserved.
         </div>
       </div>
     `,
   }),
 
   loginNotification: (user) => ({
-    subject: "🔐 New Login to Your Bolify Account",
+    subject: "🔐 New Login to Your MindLoom Account",
     message: `Hi ${user.fullName}, your account was just accessed.`,
     html: `
       <div style="max-width:600px;margin:0 auto;font-family:'Segoe UI',Arial,sans-serif;color:#374151;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
         <div style="background:#f59e0b;color:#fff;padding:18px 24px;text-align:center;font-size:20px;font-weight:600;">
-          Bolify
+          MindLoom
         </div>
         <div style="padding:24px;">
           <h2 style="color:#111827;margin-bottom:10px;">Security Notice</h2>
-          <p>Hello ${user.fullName}, your Bolify account was just logged in.</p>
+          <p>Hello ${user.fullName}, your MindLoom account was just logged in.</p>
           <p>If this wasn’t you, <a href="${process.env.FRONTEND_URL}/reset-password" style="color:#f59e0b;font-weight:600;">reset your password immediately</a>.</p>
         </div>
         <div style="background:#f3f4f6;padding:14px;text-align:center;font-size:12px;color:#6b7280;">
-          © ${new Date().getFullYear()} Bolify. All rights reserved.
+          © ${new Date().getFullYear()} MindLoom. All rights reserved.
         </div>
       </div>
     `,
@@ -128,7 +128,7 @@ const mailTemplates = {
     html: `
       <div style="max-width:600px;margin:0 auto;font-family:'Segoe UI',Arial,sans-serif;color:#374151;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
         <div style="background:#f59e0b;color:#fff;padding:18px 24px;text-align:center;font-size:20px;font-weight:600;">
-          Bolify
+          MindLoom
         </div>
         <div style="padding:24px;">
           <h2 style="color:#111827;margin-bottom:10px;">Password Reset</h2>
@@ -139,7 +139,7 @@ const mailTemplates = {
           <p style="margin-top:16px;">This link will expire in <strong>10 minutes</strong>.</p>
         </div>
         <div style="background:#f3f4f6;padding:14px;text-align:center;font-size:12px;color:#6b7280;">
-          © ${new Date().getFullYear()} Bolify. All rights reserved.
+          © ${new Date().getFullYear()} MindLoom. All rights reserved.
         </div>
       </div>
     `,
@@ -151,14 +151,14 @@ const mailTemplates = {
     html: `
       <div style="max-width:600px;margin:0 auto;font-family:'Segoe UI',Arial,sans-serif;color:#374151;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
         <div style="background:#f59e0b;color:#fff;padding:18px 24px;text-align:center;font-size:20px;font-weight:600;">
-          Bolify
+          MindLoom
         </div>
         <div style="padding:24px;">
           <h2 style="color:#111827;margin-bottom:10px;">Password Reset Successful</h2>
-          <p>Hello ${user.fullName}, your Bolify account password has been changed successfully.</p>
+          <p>Hello ${user.fullName}, your MindLoom account password has been changed successfully.</p>
         </div>
         <div style="background:#f3f4f6;padding:14px;text-align:center;font-size:12px;color:#6b7280;">
-          © ${new Date().getFullYear()} Bolify. All rights reserved.
+          © ${new Date().getFullYear()} MindLoom. All rights reserved.
         </div>
       </div>
     `,
@@ -170,14 +170,14 @@ const mailTemplates = {
     html: `
       <div style="max-width:600px;margin:0 auto;font-family:'Segoe UI',Arial,sans-serif;color:#374151;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
         <div style="background:#f59e0b;color:#fff;padding:18px 24px;text-align:center;font-size:20px;font-weight:600;">
-          Bolify
+          MindLoom
         </div>
         <div style="padding:24px;">
           <h2 style="color:#111827;margin-bottom:10px;">Welcome, ${user.fullName}!</h2>
-          <p>You signed in using Google. Enjoy exploring Bolify!</p>
+          <p>You signed in using Google. Enjoy exploring MindLoom!</p>
         </div>
         <div style="background:#f3f4f6;padding:14px;text-align:center;font-size:12px;color:#6b7280;">
-          © ${new Date().getFullYear()} Bolify. All rights reserved.
+          © ${new Date().getFullYear()} MindLoom. All rights reserved.
         </div>
       </div>
     `,
