@@ -38,6 +38,7 @@ const blogSchema = new Schema(
             type: String,
             required: true,
             trim: true,
+            maxLength: [150, "Title cannot exceed 150 characters"],
         },
         slug: {
             type: String,
@@ -93,6 +94,7 @@ const blogSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "Category",
         },
+        comments: [commentSchema],
     },
     {
         timestamps: true,
@@ -101,8 +103,15 @@ const blogSchema = new Schema(
 
 // Pre-save hook to generate slug from title before saving
 blogSchema.pre("validate", function (next) {
-    if (this.isModified("title")) {
-        this.slug = slugify(this.title) + '-' + Date.now(); // Add timestamp for uniqueness
+    if (this.isNew || this.isModified("title")) {
+        // Only generate a new slug if the document is completely new, 
+        // to prevent breaking existing URLs if a title is updated later.
+        if (this.isNew || !this.slug) {
+            const baseSlug = slugify(this.title);
+            // using a shorter random string instead of full Date.now() for cleaner URLs
+            const uniqueSuffix = Math.random().toString(36).substring(2, 7); 
+            this.slug = `${baseSlug}-${uniqueSuffix}`;
+        }
     }
     next();
 });

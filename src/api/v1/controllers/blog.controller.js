@@ -182,6 +182,7 @@ const getAllBlogs = asyncHandler(async (req, res) => {
             $project: {
                 title: 1,
                 slug: 1,
+                body: 1,
                 coverImage: 1,
                 views: 1,
                 likes: 1,

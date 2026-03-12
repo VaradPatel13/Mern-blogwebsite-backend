@@ -1,1 +1,1 @@
-export const DB_NAME = "bolify";
+export const DB_NAME = "blogweb";

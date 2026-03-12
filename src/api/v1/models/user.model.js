@@ -36,7 +36,7 @@ const userSchema = new Schema(
         avatar: {
             type: String, // URL from a service like Cloudinary or ImageKit
             required: true,
-            default: "https://ik.imagekit.io/neg1amxgpy/Profile_Pic/default_awtar_MDnC7hgbv?updatedAt=1754414667374"
+            default: "https://static.vecteezy.com/system/resources/previews/048/926/084/non_2x/silver-membership-icon-default-avatar-profile-icon-membership-icon-social-media-user-image-illustration-vector.jpg"
         },
         password: {
             type: String,
@@ -47,7 +47,7 @@ const userSchema = new Schema(
         },
         role: {
             type: String,
-            enum: ["USER", "ADMIN"],
+            enum: ["USER"   ],
             default: "USER",
         },
         passwordResetToken: String,

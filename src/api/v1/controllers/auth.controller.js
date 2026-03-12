@@ -99,14 +99,14 @@ const loginUser = asyncHandler(async (req, res) => {
     const options = {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "none",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     };
 
     // Optional: only send notification if suspicious login (new device, IP, etc.)
-    sendEmail({
-        email: user.email,
-        ...mailTemplates.loginNotification(user),
-    }).catch(console.error);
+    // sendEmail({
+    //     email: user.email,
+    //     ...mailTemplates.loginNotification(user),
+    // }).catch(console.error);
 
     return res
         .status(200)
@@ -135,7 +135,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     const options = {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "none",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     };
 
     return res
@@ -174,7 +174,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
         const options = {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            sameSite: "none",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         };
 
         return res
@@ -266,7 +266,7 @@ const resetPassword = asyncHandler(async (req, res) => {
     const options = {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "none",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     };
 
     sendEmail({
@@ -327,7 +327,7 @@ const googleLogin = asyncHandler(async (req, res) => {
     const options = {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "none",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     };
 
     return res
