@@ -6,6 +6,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { Blog } from "../models/blog.model.js";
 import imagekit from "../utils/imagekit.js";
 import mongoose from "mongoose";
+import { clearCache } from "../middlewares/cache.middleware.js";
 
 // --- Keep existing functions: createBlog, getBlogBySlug, updateBlog, deleteBlog, getAllBlogs ---
 // ... (code from previous step)
@@ -47,6 +48,8 @@ const createBlog = asyncHandler(async (req, res) => {
         category, // Assign category
         tags, // Assign tags
     });
+
+    clearCache("cache:/api/v1/blogs*");
 
     return res
         .status(201)
@@ -124,6 +127,8 @@ const updateBlog = asyncHandler(async (req, res) => {
 
     await blog.save({ validateBeforeSave: true });
 
+    clearCache("cache:/api/v1/blogs*");
+
     return res
         .status(200)
         .json(new ApiResponse(200, blog, "Blog post updated successfully."));
@@ -155,6 +160,8 @@ const deleteBlog = asyncHandler(async (req, res) => {
     }
 
     await blog.deleteOne();
+
+    clearCache("cache:/api/v1/blogs*");
 
     return res
         .status(200)
@@ -229,6 +236,8 @@ const toggleLike = asyncHandler(async (req, res) => {
 
     const updatedBlog = await Blog.findByIdAndUpdate(id, updateOperation, { new: true });
 
+    clearCache("cache:/api/v1/blogs*");
+
     return res.status(200).json(
         new ApiResponse(
             200,
@@ -267,6 +276,8 @@ const addComment = asyncHandler(async (req, res) => {
     }
 
     const addedComment = updatedBlog.comments[updatedBlog.comments.length - 1];
+
+    clearCache("cache:/api/v1/blogs*");
 
     return res.status(201).json(
         new ApiResponse(201, addedComment, "Comment added successfully.")
