@@ -15,12 +15,9 @@ app.use(morgan('dev'));
 
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://mern-blogwebsite-frontend.vercel.app",
-      "https://mindloomsblog.vercel.app",
-      "https://scribloom.vercel.app"
-    ],
+    origin: process.env.CORS_ORIGIN
+      ? process.env.CORS_ORIGIN.split(",")
+      : ["http://localhost:5173"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
