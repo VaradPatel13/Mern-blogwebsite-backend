@@ -1,12 +1,12 @@
 // src/api/v1/routes/search.routes.js
 
 import { Router } from "express";
-import { searchSite } from "../controllers/search.controller.js";
-import { redisCache } from "../middlewares/cache.middleware.js";
+import { searchBlogs, getSearchFacets } from "../controllers/search.controller.js";
 
 const router = Router();
 
-// A single public route for all search queries (Cached for 15 minutes)
-router.route("/").get(redisCache(900), searchSite);
+// Public search routes — no Redis cache (search results are dynamic and user-specific)
+router.route("/").get(searchBlogs);
+router.route("/facets").get(getSearchFacets);
 
 export default router;

@@ -31,6 +31,38 @@ const getAllCategories = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, categories, "Categories fetched successfully"));
 });
 
+const getTrendingCategories = asyncHandler(async (req, res) => {
+    const limit = Math.min(parseInt(req.query.limit, 10) || 5, 20);
+
+    const trending = await Blog.aggregate([
+        { $match: { status: "published", category: { $ne: null } } },
+        { $group: { _id: "$category", blogCount: { $sum: 1 }, totalViews: { $sum: "$views" }, totalLikes: { $sum: "$likes" } } },
+        { $sort: { blogCount: -1, totalViews: -1 } },
+        { $limit: limit },
+        {
+            $lookup: {
+                from: "categories",
+                localField: "_id",
+                foreignField: "_id",
+                as: "category"
+            }
+        },
+        { $unwind: "$category" },
+        {
+            $project: {
+                _id: "$category._id",
+                name: "$category.name",
+                slug: "$category.slug",
+                blogCount: 1,
+                totalViews: 1,
+                totalLikes: 1
+            }
+        }
+    ]);
+
+    return res.status(200).json(new ApiResponse(200, trending, "Trending categories fetched successfully"));
+});
+
 const getBlogsByCategory = asyncHandler(async (req, res) => {
     const { slug } = req.params;
     const category = await Category.findOne({ slug });
@@ -109,5 +141,5 @@ const deleteCategory = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, {}, "Category deleted successfully."));
 });
 
-export { createCategory, getAllCategories, getBlogsByCategory, updateCategory, deleteCategory };
+export { createCategory, getAllCategories, getTrendingCategories, getBlogsByCategory, updateCategory, deleteCategory };
 

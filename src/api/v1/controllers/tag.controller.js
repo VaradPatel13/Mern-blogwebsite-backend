@@ -30,6 +30,39 @@ const getAllTags = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, tags, "Tags fetched successfully"));
 });
 
+const getTrendingTags = asyncHandler(async (req, res) => {
+    const limit = Math.min(parseInt(req.query.limit, 10) || 5, 20);
+
+    const trending = await Blog.aggregate([
+        { $match: { status: "published", tags: { $exists: true, $ne: [] } } },
+        { $unwind: "$tags" },
+        { $group: { _id: "$tags", blogCount: { $sum: 1 }, totalViews: { $sum: "$views" }, totalLikes: { $sum: "$likes" } } },
+        { $sort: { blogCount: -1, totalViews: -1 } },
+        { $limit: limit },
+        {
+            $lookup: {
+                from: "tags",
+                localField: "_id",
+                foreignField: "_id",
+                as: "tag"
+            }
+        },
+        { $unwind: "$tag" },
+        {
+            $project: {
+                _id: "$tag._id",
+                name: "$tag.name",
+                slug: "$tag.slug",
+                blogCount: 1,
+                totalViews: 1,
+                totalLikes: 1
+            }
+        }
+    ]);
+
+    return res.status(200).json(new ApiResponse(200, trending, "Trending tags fetched successfully"));
+});
+
 const getBlogsByTag = asyncHandler(async (req, res) => {
     const { slug } = req.params;
     const tag = await Tag.findOne({ slug });
@@ -66,4 +99,4 @@ const deleteTag = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, {}, "Tag deleted successfully."));
 });
 
-export { createTag, getAllTags, getBlogsByTag, updateTag, deleteTag };
+export { createTag, getAllTags, getTrendingTags, getBlogsByTag, updateTag, deleteTag };

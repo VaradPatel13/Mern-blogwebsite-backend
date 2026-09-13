@@ -1,0 +1,54 @@
+{
+  "name": "blog_search",
+  "definition": {
+    "analyzers": [
+      {
+        "name": "blog_analyzer",
+        "tokenFilters": [
+          "lowercase",
+          "stemmer",
+          "stopwords"
+        ],
+        "charFilters": [],
+        "tokenizer": {
+          "type": "standard"
+        }
+      }
+    ],
+    "mappings": {
+      "fields": {
+        "title": {
+          "type": "string",
+          "analyzer": "blog_analyzer",
+          "norms": "display",
+          "multi": {
+            "basic": {
+              "analyzer": "blog_analyzer"
+            },
+            "exact": {
+              "analyzer": "lucene.keyword"
+            }
+          }
+        },
+        "body": {
+          "type": "string",
+          "analyzer": "blog_analyzer",
+          "norms": "display"
+        },
+        "status": {
+          "type": "string",
+          "analyzer": "lucene.keyword"
+        },
+        "views": {
+          "type": "number"
+        },
+        "likes": {
+          "type": "number"
+        },
+        "createdAt": {
+          "type": "date"
+        }
+      }
+    }
+  }
+}
