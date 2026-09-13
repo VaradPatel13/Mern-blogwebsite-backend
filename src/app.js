@@ -4,6 +4,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import routerV1 from "./api/v1/routes/index.js";
+import { sitemap, robotsTxt, rssFeed } from "./api/v1/controllers/seo.controller.js";
 import { errorHandler } from "./api/v1/middlewares/error.middleware.js";
 import morgan from "morgan";
 
@@ -29,7 +30,12 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(express.static("public"));
 app.use(cookieParser());
 
-// --- Routes ---
+// --- SEO Routes (root level for crawlers) ---
+app.get("/sitemap.xml", sitemap);
+app.get("/robots.txt", robotsTxt);
+app.get("/feed.xml", rssFeed);
+
+// --- API Routes ---
 app.use("/api/v1", routerV1);
 
 // Health Check Endpoint

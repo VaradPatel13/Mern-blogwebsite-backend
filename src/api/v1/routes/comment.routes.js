@@ -1,5 +1,5 @@
 
-// src/api/v1/routes/comment.routes.js (NEW FILE)
+// src/api/v1/routes/comment.routes.js
 
 import { Router } from "express";
 import { body } from "express-validator";
@@ -9,22 +9,24 @@ import { validate } from "../middlewares/validation.middleware.js";
 
 const router = Router();
 
-router.use(verifyJWT); // Apply JWT auth to all routes in this file
-
+// Public: anyone can read comments
 router.route("/:blogId").get(getBlogComments);
 
+// Protected: must be logged in to create, update, delete
 router.route("/:blogId").post(
+    verifyJWT,
     [body("text", "Comment text cannot be empty").notEmpty()],
     validate,
     createComment
 );
 
 router.route("/c/:commentId").patch(
+    verifyJWT,
     [body("text", "Comment text cannot be empty").notEmpty()],
     validate,
     updateComment
 );
 
-router.route("/c/:commentId").delete(deleteComment);
+router.route("/c/:commentId").delete(verifyJWT, deleteComment);
 
 export default router;
