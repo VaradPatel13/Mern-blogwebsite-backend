@@ -119,4 +119,6 @@ blogSchema.pre("validate", function (next) {
 // Add the pagination plugin
 blogSchema.plugin(mongooseAggregatePaginate);
 
+blogSchema.index({ title: "text", body: "text" });
+
 export const Blog = mongoose.model("Blog", blogSchema);
